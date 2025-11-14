@@ -94,7 +94,7 @@ public class GrabObject : Interactable
         Equip(placeTransform, resetRot: true);
         if (setParentOfGrabObj)
         {
-            base.transform.SetParent(otherGrabObj.transform);
+            transform.SetParent(otherGrabObj.transform);
         }
         ResetScale();
         if (myRb != null)
@@ -117,8 +117,8 @@ public class GrabObject : Interactable
     private void SetupObject()
     {
         started = true;
-        base.SecondStart();
-        localStartScale = base.transform.localScale;
+        SecondStart();
+        localStartScale = transform.localScale;
         myRb = GetComponent<Rigidbody>();
         grabObjTransform = PlayerInteract.Instance.grabHolder;
         GetChildMeshes();
@@ -143,18 +143,18 @@ public class GrabObject : Interactable
             FreezeObj();
             if (resetRot)
             {
-                base.transform.SetParent(parentTransform);
+                transform.SetParent(parentTransform);
                 myRb.constraints = RigidbodyConstraints.FreezeAll;
                 rotatingToPos = PlayerController.Instance.StartCoroutine(resetRotation());
                 movingToPos = PlayerController.Instance.StartCoroutine(resetPosition());
                 return;
             }
-            base.transform.SetParent(grabObjTransform);
+            transform.SetParent(grabObjTransform);
             myRb.constraints = RigidbodyConstraints.None;
             myRb.isKinematic = false;
             equiped = true;
             myRb.interpolation = RigidbodyInterpolation.None;
-            base.gameObject.layer = 7;
+            gameObject.layer = 7;
             defaultMass = myRb.mass;
             myRb.mass = 0.01f;
         }
@@ -163,16 +163,16 @@ public class GrabObject : Interactable
     {
         float lerpValue = 0f;
         float time = 0.15f;
-        Vector3 startPos = base.transform.localPosition;
+        Vector3 startPos = transform.localPosition;
         Vector3 endPos = Vector3.zero + localPosOffset;
-        // AudioController.instance.SpawnCombineSoundAtPos(transform.position);
+        AudioController.Instance.SpawnCombineSoundAtPos(transform.position);
         while (lerpValue <= time)
         {
-            base.transform.localPosition = Vector3.Lerp(startPos, endPos, lerpValue / time);
+            transform.localPosition = Vector3.Lerp(startPos, endPos, lerpValue / time);
             lerpValue += Time.deltaTime;
             yield return null;
         }
-        base.transform.localPosition = endPos;
+        transform.localPosition = endPos;
         movingToPos = null;
         if (lettuceHelpObj != null)
         {
@@ -185,7 +185,7 @@ public class GrabObject : Interactable
                 StopCoroutine(rotatingToPos);
             }
             lettuceHelpObj.SetActive(value: true);
-            base.gameObject.SetActive(value: false);
+            gameObject.SetActive(value: false);
         }
         tempCor = null;
     }
@@ -205,15 +205,15 @@ public class GrabObject : Interactable
     {
         float lerpValue = 0f;
         float time = 0.25f;
-        Vector3 startRot = base.transform.localEulerAngles;
+        Vector3 startRot = transform.localEulerAngles;
         Vector3 endRot = Vector3.zero;
         while (lerpValue <= time)
         {
-            base.transform.localEulerAngles = AngleLerp(startRot, endRot, lerpValue / time);
+            transform.localEulerAngles = AngleLerp(startRot, endRot, lerpValue / time);
             lerpValue += Time.deltaTime;
             yield return null;
         }
-        base.transform.localEulerAngles = endRot;
+        transform.localEulerAngles = endRot;
         rotatingToPos = null;
     }
 
@@ -221,12 +221,29 @@ public class GrabObject : Interactable
     {
         if (equiped)
         {
-            Vector3 velocity = (grabObjTransform.position + grabObjTransform.right * dragOffset.x + grabObjTransform.up * dragOffset.y - base.transform.position) * 700f * Time.fixedDeltaTime;
+            Vector3 velocity = (grabObjTransform.position + grabObjTransform.right * dragOffset.x + grabObjTransform.up * dragOffset.y - transform.position) * 700f * Time.fixedDeltaTime;
             myRb.velocity = velocity;
+        }
+    }
+    public Rigidbody getMyRb()
+    {
+        if (myRb == null)
+        {
+            return myRb = GetComponent<Rigidbody>();
+        }
+        return myRb;
+    }
+
+    public void OnCollisionEnter(Collision other)
+    {
+
+        if (movingToPos == null && rotatingToPos == null && getMyRb().velocity.magnitude > 0.35f && other.gameObject.GetComponent<TriggerObject>() == null)
+        {
+            AudioController.Instance.SpawnDropSound(transform.position, getMyRb().velocity.magnitude / 13f);
         }
     }
     public void ResetScale()
     {
-        base.transform.localScale = localStartScale;
+        transform.localScale = localStartScale;
     }
 }

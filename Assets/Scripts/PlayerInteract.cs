@@ -151,6 +151,10 @@ public class PlayerInteract : MonoBehaviour
         currentGrabObj = tempGrabObj;
         UIController.Instance.SetButtonsHint(tempGrabObj != null);
     }
+    public bool isCurrentGrabObject(GrabObject thisGrabObj)
+    {
+        return currentGrabObj == thisGrabObj;
+    }
     public void EquipGrabObj(GrabObject tempGrabObj)
     {
         if (!hasGrabObj())
