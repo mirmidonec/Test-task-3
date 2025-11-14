@@ -1841,7 +1841,7 @@ MonoBehaviour:
   currentGrabObj: {fileID: 0}
   interactableMask:
     serializedVersion: 2
-    m_Bits: 321
+    m_Bits: 320
   pointMask:
     serializedVersion: 2
     m_Bits: 4294967295
